@@ -23,6 +23,13 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 #endif
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{
+        @"touchdxEnabled": @YES,
+        @"touchdxPort": @4321,
+        @"touchdxScale": @1.0,
+        @"touchdxOffsetX": @0.0,
+        @"touchdxOffsetY": @0.0,
+    }];
 #if !TARGET_OS_TV
     UIApplicationShortcutItem* shortcut = [launchOptions valueForKey:UIApplicationLaunchOptionsShortcutItemKey];
     if (shortcut != nil) {

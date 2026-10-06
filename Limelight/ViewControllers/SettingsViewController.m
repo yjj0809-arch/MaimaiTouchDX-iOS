@@ -81,7 +81,8 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
         // indicators. Ignore any views we don't recognize.
         if (![view isKindOfClass:[UILabel class]] &&
             ![view isKindOfClass:[UISegmentedControl class]] &&
-            ![view isKindOfClass:[UISlider class]]) {
+            ![view isKindOfClass:[UISlider class]] &&
+            ![view isKindOfClass:[UISwitch class]]) {
             continue;
         }
         
@@ -263,8 +264,47 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateResolutionDisplayViewText];
+    [self addTouchDXSettings];
 }
 
+- (void)addTouchDXSettings {
+    CGFloat contentBottom = 0.0f;
+    for (UIView *view in self.scrollView.subviews) {
+        if (![view isKindOfClass:[UILabel class]] &&
+            ![view isKindOfClass:[UISegmentedControl class]] &&
+            ![view isKindOfClass:[UISlider class]] &&
+            ![view isKindOfClass:[UISwitch class]]) {
+            continue;
+        }
+        contentBottom = MAX(contentBottom, CGRectGetMaxY(view.frame));
+    }
+
+    CGFloat width = MAX(self.view.bounds.size.width, 320.0f);
+    CGFloat y = contentBottom + 24.0f;
+
+    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, y, width - 100.0f, 31.0f)];
+    titleLabel.text = @"TouchDX Multi-Touch";
+    titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    [self.scrollView addSubview:titleLabel];
+
+    UISwitch *touchDXSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(width - 71.0f, y, 51.0f, 31.0f)];
+    touchDXSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:@"touchdxEnabled"];
+    [touchDXSwitch addTarget:self
+                     action:@selector(touchDXSwitchChanged:)
+           forControlEvents:UIControlEventValueChanged];
+    [self.scrollView addSubview:touchDXSwitch];
+
+    UILabel *detailLabel = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, y + 34.0f, width - 40.0f, 44.0f)];
+    detailLabel.text = @"Sends native iPad multi-touch to the streaming host on TCP port 4321.";
+    detailLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
+    detailLabel.textColor = [UIColor grayColor];
+    detailLabel.numberOfLines = 2;
+    [self.scrollView addSubview:detailLabel];
+}
+
+- (void)touchDXSwitchChanged:(UISwitch *)sender {
+    [[NSUserDefaults standardUserDefaults] setBool:sender.on forKey:@"touchdxEnabled"];
+}
 - (void) touchModeChanged {
     // Disable on-screen controls in absolute touch mode
     [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == 0];

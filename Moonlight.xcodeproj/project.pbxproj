@@ -15,6 +15,7 @@
 		9819CC1D254F1730008A7C8E /* RelativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */; };
 		9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */; };
 		9827E7A32514366900F25707 /* HapticContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 9827E7A22514366900F25707 /* HapticContext.m */; };
+		A1B2C3D4E5F60718293A4B5C /* MaimaiTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5E /* MaimaiTouchHandler.m */; };
 		9827E7A42514366900F25707 /* HapticContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 9827E7A22514366900F25707 /* HapticContext.m */; };
 		9832D1361BBCD5C50036EF48 /* TemporaryApp.m in Sources */ = {isa = PBXBuildFile; fileRef = 9832D1351BBCD5C50036EF48 /* TemporaryApp.m */; };
 		9865DC30213260B40005B9B9 /* libmoonlight-common-tv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FB1A68152132509400507771 /* libmoonlight-common-tv.a */; };
@@ -181,6 +182,8 @@
 		9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RelativeTouchHandler.m; sourceTree = "<group>"; };
 		9819CC20254F180F008A7C8E /* AbsoluteTouchHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AbsoluteTouchHandler.h; sourceTree = "<group>"; };
 		9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AbsoluteTouchHandler.m; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B5D /* MaimaiTouchHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaimaiTouchHandler.h; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B5E /* MaimaiTouchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaimaiTouchHandler.m; sourceTree = "<group>"; };
 		9819CC25254F2734008A7C8E /* Moonlight v1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.6.xcdatamodel"; sourceTree = "<group>"; };
 		9827E7A22514366900F25707 /* HapticContext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HapticContext.m; sourceTree = "<group>"; };
 		9827E7A7251436EA00F25707 /* HapticContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HapticContext.h; sourceTree = "<group>"; };
@@ -517,6 +520,8 @@
 				9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */,
 				9819CC20254F180F008A7C8E /* AbsoluteTouchHandler.h */,
 				9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */,
+				A1B2C3D4E5F60718293A4B5D /* MaimaiTouchHandler.h */,
+				A1B2C3D4E5F60718293A4B5E /* MaimaiTouchHandler.m */,
 				988FCD3F293B091B003050E2 /* KeyboardInputField.h */,
 				988FCD40293B091B003050E2 /* KeyboardInputField.m */,
 			);
@@ -887,6 +892,7 @@
 			files = (
 				FB290D0719B2C406004C83CF /* Limelight.xcdatamodeld in Sources */,
 				9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */,
+				A1B2C3D4E5F60718293A4B5C /* MaimaiTouchHandler.m in Sources */,
 				9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */,
 				FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */,
 				FB89463219F646E200339C8A /* VideoDecoderRenderer.m in Sources */,

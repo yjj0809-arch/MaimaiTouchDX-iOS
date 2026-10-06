@@ -13,7 +13,11 @@
 #import "KeyboardSupport.h"
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
+#if !TARGET_OS_TV
+#import "MaimaiTouchHandler.h"
+#endif
 #import "KeyboardInputField.h"
+#import "Utils.h"
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
@@ -38,6 +42,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     double accumulatedMouseDeltaY;
     
     UIResponder* touchHandler;
+
+#if !TARGET_OS_TV
+    MaimaiTouchHandler* maimaiTouchHandler;
+#endif
     
     id<UserInteractionDelegate> interactionDelegate;
     NSTimer* interactionTimer;
@@ -67,17 +75,32 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
 #else
     // iOS uses RelativeTouchHandler or AbsoluteTouchHandler depending on user preference
+    BOOL touchDXEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"touchdxEnabled"];
+    if (touchDXEnabled) {
+        NSString* touchDXHost = [Utils addressPortStringToAddress:streamConfig.host];
+        NSInteger touchDXPort = [[NSUserDefaults standardUserDefaults] integerForKey:@"touchdxPort"];
+        if (touchDXPort <= 0 || touchDXPort > 65535) {
+            touchDXPort = 4321;
+        }
+
+        maimaiTouchHandler = [[MaimaiTouchHandler alloc] initWithStreamView:self
+                                                                  host:touchDXHost
+                                                                  port:(uint16_t)touchDXPort];
+        [maimaiTouchHandler start];
+        Log(LOG_I, @"TouchDX multi-touch enabled for host %@", touchDXHost);
+    }
+
     if (settings.absoluteTouchMode) {
         self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self];
     }
     else {
         self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
     }
-    
+
     onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport streamConfig:streamConfig];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
-    if (settings.absoluteTouchMode) {
-        Log(LOG_I, @"On-screen controls disabled in absolute touch mode");
+    if (touchDXEnabled || settings.absoluteTouchMode) {
+        Log(LOG_I, @"On-screen controls disabled in TouchDX/absolute touch mode");
         [onScreenControls setLevel:OnScreenControlsLevelOff];
     }
     else if (level == OnScreenControlsLevelAuto) {
@@ -127,6 +150,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // This is critical to ensure keyboard events are delivered to this
     // StreamView and not our parent UIView, especially on tvOS.
     [self becomeFirstResponder];
+}
+
+- (void)dealloc {
+#if !TARGET_OS_TV
+    [maimaiTouchHandler stop];
+#endif
+    [interactionTimer invalidate];
 }
 
 - (void)startInteractionTimer {
@@ -318,7 +348,27 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 #endif
 
+#if !TARGET_OS_TV
+- (NSSet<UITouch *> *)directTouchesFromSet:(NSSet<UITouch *> *)touches {
+    NSMutableSet<UITouch *> *directTouches = [NSMutableSet set];
+    for (UITouch *touch in touches) {
+        if (touch.type == UITouchTypeDirect) {
+            [directTouches addObject:touch];
+        }
+    }
+    return directTouches;
+}
+#endif
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    NSSet<UITouch *> *touchDXTouches = [self directTouchesFromSet:touches];
+    if (maimaiTouchHandler != nil && touchDXTouches.count > 0) {
+        [self startInteractionTimer];
+        [maimaiTouchHandler handleTouchesBegan:touchDXTouches withEvent:event];
+        return;
+    }
+#endif
     if ([self handleMouseButtonEvent:BUTTON_ACTION_PRESS
                           forTouches:touches
                            withEvent:event]) {
@@ -510,6 +560,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 #if !TARGET_OS_TV
+    NSSet<UITouch *> *touchDXTouches = [self directTouchesFromSet:touches];
+    if (maimaiTouchHandler != nil && touchDXTouches.count > 0) {
+        [maimaiTouchHandler handleTouchesMoved:touchDXTouches withEvent:event];
+        return;
+    }
+#endif
+#if !TARGET_OS_TV
     if (@available(iOS 13.4, *)) {
         for (UITouch* touch in touches) {
             if (touch.type == UITouchTypePencil) {
@@ -586,6 +643,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    NSSet<UITouch *> *touchDXTouches = [self directTouchesFromSet:touches];
+    if (maimaiTouchHandler != nil && touchDXTouches.count > 0) {
+        [maimaiTouchHandler handleTouchesEnded:touchDXTouches withEvent:event];
+        return;
+    }
+#endif
     if ([self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
                           forTouches:touches
                            withEvent:event]) {
@@ -615,6 +679,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    NSSet<UITouch *> *touchDXTouches = [self directTouchesFromSet:touches];
+    if (maimaiTouchHandler != nil && touchDXTouches.count > 0) {
+        [maimaiTouchHandler handleTouchesCancelled:touchDXTouches withEvent:event];
+        return;
+    }
+#endif
     [touchHandler touchesCancelled:touches withEvent:event];
     [self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
                       forTouches:touches
