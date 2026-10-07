@@ -30,6 +30,7 @@
 static const CGFloat kTouchDXPanelWidth = 896.0;
 static const CGFloat kTouchDXPanelHeight = 898.0;
 static const CGFloat kTouchDXDefaultRadius = 22.0;
+static const CGFloat kTouchDXBCDEHalfCentimeterRadius = 8.6;
 
 typedef struct {
     CGFloat scale;
@@ -381,14 +382,21 @@ static BOOL TouchDXPathIntersectsCircle(CGPathRef path,
 
     CGPoint panelPoint = [self panelPointForTouch:touch];
     TouchDXPanelTransform transform = [self panelTransform];
-    CGFloat radius = inGame ? kTouchDXDefaultRadius / MAX(transform.scale, 0.001f) : 0.0f;
     uint64_t mask = 0;
 
     for (MaimaiTouchRegion *region in _regions) {
         BOOL hit = NO;
 
-        if (inGame) {
-            hit = TouchDXPathIntersectsCircle(region.path, panelPoint, radius);
+        unichar regionPrefix = [region.identifier characterAtIndex:0];
+        BOOL isAArea = regionPrefix == 'A';
+        CGFloat regionRadius = kTouchDXDefaultRadius;
+        if (!isAArea) {
+            regionRadius += kTouchDXBCDEHalfCentimeterRadius;
+        }
+        regionRadius /= MAX(transform.scale, 0.001f);
+
+        if (inGame || !isAArea) {
+            hit = TouchDXPathIntersectsCircle(region.path, panelPoint, regionRadius);
         }
         else {
             hit = TouchDXPathContainsPoint(region.path, panelPoint);
@@ -396,7 +404,7 @@ static BOOL TouchDXPathIntersectsCircle(CGPathRef path,
 
         if (hit) {
             mask |= (1ULL << region.bitIndex);
-            if (!inGame) {
+            if (!inGame && isAArea) {
                 break;
             }
         }
