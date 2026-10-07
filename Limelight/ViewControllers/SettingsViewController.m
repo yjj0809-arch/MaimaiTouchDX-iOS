@@ -16,6 +16,10 @@
 @implementation SettingsViewController {
     NSInteger _bitrate;
     NSInteger _lastSelectedResolutionIndex;
+    UISlider *_touchDXRadiusSlider;
+    UILabel *_touchDXRadiusValueLabel;
+    UISlider *_touchDXBCDESlider;
+    UILabel *_touchDXBCDEValueLabel;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -300,10 +304,54 @@ BOOL isCustomResolution(CGSize res) {
     detailLabel.textColor = [UIColor grayColor];
     detailLabel.numberOfLines = 2;
     [self.scrollView addSubview:detailLabel];
+
+    CGFloat controlsY = y + 86.0f;
+    CGFloat controlWidth = width - 40.0f;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+    _touchDXRadiusValueLabel = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, controlsY, controlWidth, 24.0f)];
+    _touchDXRadiusValueLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
+    [self.scrollView addSubview:_touchDXRadiusValueLabel];
+
+    _touchDXRadiusSlider = [[UISlider alloc] initWithFrame:CGRectMake(20.0f, controlsY + 24.0f, controlWidth, 31.0f)];
+    _touchDXRadiusSlider.minimumValue = 5.0f;
+    _touchDXRadiusSlider.maximumValue = 60.0f;
+    _touchDXRadiusSlider.value = [defaults floatForKey:@"touchdxRadius"];
+    [_touchDXRadiusSlider addTarget:self action:@selector(touchDXRadiusChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.scrollView addSubview:_touchDXRadiusSlider];
+
+    CGFloat bcdeY = controlsY + 68.0f;
+    _touchDXBCDEValueLabel = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, bcdeY, controlWidth, 24.0f)];
+    _touchDXBCDEValueLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
+    [self.scrollView addSubview:_touchDXBCDEValueLabel];
+
+    _touchDXBCDESlider = [[UISlider alloc] initWithFrame:CGRectMake(20.0f, bcdeY + 24.0f, controlWidth, 31.0f)];
+    _touchDXBCDESlider.minimumValue = 0.0f;
+    _touchDXBCDESlider.maximumValue = 40.0f;
+    _touchDXBCDESlider.value = [defaults floatForKey:@"touchdxBCDERadius"];
+    [_touchDXBCDESlider addTarget:self action:@selector(touchDXBCDEXRadiusChanged:) forControlEvents:UIControlEventValueChanged];
+    [self.scrollView addSubview:_touchDXBCDESlider];
+
+    [self updateTouchDXRadiusLabels];
 }
 
 - (void)touchDXSwitchChanged:(UISwitch *)sender {
     [[NSUserDefaults standardUserDefaults] setBool:sender.on forKey:@"touchdxEnabled"];
+}
+
+- (void)touchDXRadiusChanged:(UISlider *)sender {
+    [[NSUserDefaults standardUserDefaults] setFloat:sender.value forKey:@"touchdxRadius"];
+    [self updateTouchDXRadiusLabels];
+}
+
+- (void)touchDXBCDEXRadiusChanged:(UISlider *)sender {
+    [[NSUserDefaults standardUserDefaults] setFloat:sender.value forKey:@"touchdxBCDERadius"];
+    [self updateTouchDXRadiusLabels];
+}
+
+- (void)updateTouchDXRadiusLabels {
+    _touchDXRadiusValueLabel.text = [NSString stringWithFormat:@"TouchDX Touch Radius: %.1f", _touchDXRadiusSlider.value];
+    _touchDXBCDEValueLabel.text = [NSString stringWithFormat:@"B/C/D/E Extra Radius: %.1f (about %.2f cm)", _touchDXBCDESlider.value, _touchDXBCDESlider.value / 17.2f];
 }
 - (void) touchModeChanged {
     // Disable on-screen controls in absolute touch mode

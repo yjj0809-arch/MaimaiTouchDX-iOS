@@ -231,6 +231,8 @@ static BOOL TouchDXPathIntersectsCircle(CGPathRef path,
     CGFloat _userScale;
     CGFloat _offsetX;
     CGFloat _offsetY;
+    CGFloat _baseTouchRadius;
+    CGFloat _bcdeExtraRadius;
     NSTimeInterval _lastConnectAttempt;
 }
 
@@ -252,6 +254,8 @@ static BOOL TouchDXPathIntersectsCircle(CGPathRef path,
         _userScale = [defaults objectForKey:@"touchdxScale"] != nil ? [defaults floatForKey:@"touchdxScale"] : 1.0f;
         _offsetX = [defaults objectForKey:@"touchdxOffsetX"] != nil ? [defaults floatForKey:@"touchdxOffsetX"] : 0.0f;
         _offsetY = [defaults objectForKey:@"touchdxOffsetY"] != nil ? [defaults floatForKey:@"touchdxOffsetY"] : 0.0f;
+        _baseTouchRadius = [defaults objectForKey:@"touchdxRadius"] != nil ? [defaults floatForKey:@"touchdxRadius"] : kTouchDXDefaultRadius;
+        _bcdeExtraRadius = [defaults objectForKey:@"touchdxBCDERadius"] != nil ? [defaults floatForKey:@"touchdxBCDERadius"] : kTouchDXBCDEHalfCentimeterRadius;
 
         [self loadRegions];
     }
@@ -389,9 +393,9 @@ static BOOL TouchDXPathIntersectsCircle(CGPathRef path,
 
         unichar regionPrefix = [region.identifier characterAtIndex:0];
         BOOL isAArea = regionPrefix == 'A';
-        CGFloat regionRadius = kTouchDXDefaultRadius;
+        CGFloat regionRadius = _baseTouchRadius;
         if (!isAArea) {
-            regionRadius += kTouchDXBCDEHalfCentimeterRadius;
+            regionRadius += _bcdeExtraRadius;
         }
         regionRadius /= MAX(transform.scale, 0.001f);
 

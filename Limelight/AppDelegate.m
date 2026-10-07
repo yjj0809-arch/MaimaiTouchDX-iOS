@@ -29,6 +29,8 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
         @"touchdxScale": @1.0,
         @"touchdxOffsetX": @0.0,
         @"touchdxOffsetY": @0.0,
+        @"touchdxRadius": @22.0,
+        @"touchdxBCDERadius": @8.6,
     }];
 #if !TARGET_OS_TV
     UIApplicationShortcutItem* shortcut = [launchOptions valueForKey:UIApplicationLaunchOptionsShortcutItemKey];
